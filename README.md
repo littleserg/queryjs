@@ -1,6 +1,6 @@
 queryjs
 =======
-Javascript library to work with sql database based on query-dsl approach
+Javascript promise-based library to work with relational database following query-dsl approach
 
 Defining entities
 -----------------
@@ -21,6 +21,10 @@ Select query
 ```
   queryjs.from(Order)
       .where(Order.processed.eq(true))
+      .list()
+      .then(function (orders) {
+        console.log('Found', orders.length, 'processed orders in the database')
+      })
 ```
   
 Insert query
