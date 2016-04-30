@@ -147,6 +147,10 @@
             return true;
         };
 
+        Entity.prototype.clone = function () {
+            return new Entity(_.clone(this));
+        };
+
         Entity.get = function (name) {
             return _.find(this.metadata.fields, {name: name});
         };

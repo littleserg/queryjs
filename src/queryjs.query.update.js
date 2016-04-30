@@ -58,7 +58,6 @@
             }).join('\n AND ');
         }
 
-        qjs.logDebug('\n' + sql, args);
         return new Promise(function (resolve, reject) {
             if (!tx) {
                 qjs.transaction(function (tx) {
