@@ -1,0 +1,26 @@
+{
+  "name": "queryjs",
+  "homepage": "https://github.com/littleserg/queryjs",
+  "authors": [
+    "Sergii Netesanyi <s.netesany@gmail.com>"
+  ],
+  "description": "Javascript promise-based library to work with relational database following query-dsl approach",
+  "main": "queryjs.core.js",
+  "keywords": [
+    "sql",
+    "querydsl",
+    "js",
+    "database",
+    "relational",
+    "promise"
+  ],
+  "license": "Apache License 2.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "www/lib",
+    "test",
+    "tests"
+  ]
+}
