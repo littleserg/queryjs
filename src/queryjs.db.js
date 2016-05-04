@@ -50,10 +50,11 @@
         qjs.db.sqliteplugin.transaction = function (t) {
             var that = {};
             that.executeSql = function (query, args) {
-                qjs.logDebug(query, args);
-
                 return new Promise(function (resolve, reject) {
+                    var start = new Date().getTime();
                     t.executeSql(query, args, function (_, result) {
+                        qjs.logDebug(query, args, '\n{executed in', (new Date().getTime() - start), 'ms}');
+
                         var results = [];
                         for (var i = 0; i < result.rows.length; i++) {
                             results.push(result.rows.item(i));
@@ -85,10 +86,10 @@
         qjs.db.websql.transaction = function (t) {
             var that = {};
             that.executeSql = function (query, args, successFn, errorFn) {
-                qjs.logDebug(query, args);
-
                 return new Promise(function (resolve, reject) {
+                    var start = new Date().getTime();
                     t.executeSql(query, args, function (_, result) {
+                        qjs.logDebug(query, args, '\n{executed in', (new Date().getTime() - start), 'ms}');
                         var results = [];
                         for (var i = 0; i < result.rows.length; i++) {
                             results.push(result.rows.item(i));

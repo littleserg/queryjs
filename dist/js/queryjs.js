@@ -63,10 +63,10 @@
         JSON: {
             'id': 'DATE',
             toSql: function (value) {
-                return JSON.stringify(value);
+                return value ? JSON.stringify(value) : value;
             },
             fromSql: function (sqlValue) {
-                return JSON.parse(sqlValue);
+                return sqlValue ? JSON.parse(sqlValue) : sqlValue;
             }
         }
     };
@@ -82,8 +82,8 @@
 
     qjs.logError = function () {
         window.console && (
-            window.console.error ?
-                window.console.error.apply(window.console, arguments)
+            window.console.error
+                ? window.console.error.apply(window.console, arguments)
                 : window.console.log.apply(window.console, arguments)
         );
     };
@@ -151,6 +151,10 @@
             }
 
             return true;
+        };
+
+        Entity.prototype.clone = function () {
+            return new Entity(_.clone(this));
         };
 
         Entity.get = function (name) {
@@ -258,8 +262,8 @@
         if (!right) {
             throw new Error('Check right operand to apply operator "' + operator + '"');
         }
-        this.leftOperand = createOperand(left);
-        this.rightOperand = createOperand(right);
+        this.leftOperand = createOperand(left, right);
+        this.rightOperand = createOperand(right, left);
         this.operator = operator;
         this.aggregator = aggregator;
     }
@@ -315,8 +319,9 @@
         return this.value.entity.metadata.alias + '.' + this.value.name;
     };
 
-    function ValueOperand(field) {
+    function ValueOperand(field, dependendField) {
         Operand.call(this, field);
+        this.field = dependendField;
     }
 
     ValueOperand.prototype = _.create(Operand.prototype, {
@@ -324,7 +329,7 @@
     });
 
     ValueOperand.prototype.toSql = function (params) {
-        params.push(_.isDate(this.value) ? this.value.getTime() : this.value);
+        params.push(this.field ? this.field.type.toSql(this.value) : this.value);
         return '?';
     };
 
@@ -347,9 +352,9 @@
         return '(?' + _.repeat(',?', this.value.length - 1) + ')';
     };
 
-    function createOperand(value) {
-        if (_.isString(value) || _.isNumber(value) || _.isDate(value)) {
-            return new ValueOperand(value);
+    function createOperand(value, dependent) {
+        if (_.isString(value) || _.isNumber(value) || _.isDate(value) || _.isBoolean(value)) {
+            return new ValueOperand(value, dependent instanceof EntityField ? dependent : undefined);
         } else if (value instanceof EntityField) {
             return new EntityFieldOperand(value);
         } else if (_.isArray(value)) {
@@ -727,7 +732,6 @@
             }).join('\n AND ');
         }
 
-        qjs.logDebug('\n' + sql, args);
         return new Promise(function (resolve, reject) {
             if (!tx) {
                 qjs.transaction(function (tx) {
@@ -1049,10 +1053,11 @@
         qjs.db.sqliteplugin.transaction = function (t) {
             var that = {};
             that.executeSql = function (query, args) {
-                qjs.logDebug(query, args);
-
                 return new Promise(function (resolve, reject) {
+                    var start = new Date().getTime();
                     t.executeSql(query, args, function (_, result) {
+                        qjs.logDebug(query, args, '\n{executed in', (new Date().getTime() - start), 'ms}');
+
                         var results = [];
                         for (var i = 0; i < result.rows.length; i++) {
                             results.push(result.rows.item(i));
@@ -1084,10 +1089,10 @@
         qjs.db.websql.transaction = function (t) {
             var that = {};
             that.executeSql = function (query, args, successFn, errorFn) {
-                qjs.logDebug(query, args);
-
                 return new Promise(function (resolve, reject) {
+                    var start = new Date().getTime();
                     t.executeSql(query, args, function (_, result) {
+                        qjs.logDebug(query, args, '\n{executed in', (new Date().getTime() - start), 'ms}');
                         var results = [];
                         for (var i = 0; i < result.rows.length; i++) {
                             results.push(result.rows.item(i));
@@ -1119,4 +1124,5 @@
     };
 
 })();
+
 })();

@@ -57,10 +57,10 @@
         JSON: {
             'id': 'DATE',
             toSql: function (value) {
-                return JSON.stringify(value);
+                return value ? JSON.stringify(value) : value;
             },
             fromSql: function (sqlValue) {
-                return JSON.parse(sqlValue);
+                return sqlValue ? JSON.parse(sqlValue) : sqlValue;
             }
         }
     };
@@ -76,8 +76,8 @@
 
     qjs.logError = function () {
         window.console && (
-            window.console.error ?
-                window.console.error.apply(window.console, arguments)
+            window.console.error
+                ? window.console.error.apply(window.console, arguments)
                 : window.console.log.apply(window.console, arguments)
         );
     };
@@ -256,8 +256,8 @@
         if (!right) {
             throw new Error('Check right operand to apply operator "' + operator + '"');
         }
-        this.leftOperand = createOperand(left);
-        this.rightOperand = createOperand(right);
+        this.leftOperand = createOperand(left, right);
+        this.rightOperand = createOperand(right, left);
         this.operator = operator;
         this.aggregator = aggregator;
     }
@@ -313,8 +313,9 @@
         return this.value.entity.metadata.alias + '.' + this.value.name;
     };
 
-    function ValueOperand(field) {
+    function ValueOperand(field, dependendField) {
         Operand.call(this, field);
+        this.field = dependendField;
     }
 
     ValueOperand.prototype = _.create(Operand.prototype, {
@@ -322,7 +323,7 @@
     });
 
     ValueOperand.prototype.toSql = function (params) {
-        params.push(_.isDate(this.value) ? this.value.getTime() : this.value);
+        params.push(this.field ? this.field.type.toSql(this.value) : this.value);
         return '?';
     };
 
@@ -345,9 +346,9 @@
         return '(?' + _.repeat(',?', this.value.length - 1) + ')';
     };
 
-    function createOperand(value) {
-        if (_.isString(value) || _.isNumber(value) || _.isDate(value)) {
-            return new ValueOperand(value);
+    function createOperand(value, dependent) {
+        if (_.isString(value) || _.isNumber(value) || _.isDate(value) || _.isBoolean(value)) {
+            return new ValueOperand(value, dependent instanceof EntityField ? dependent : undefined);
         } else if (value instanceof EntityField) {
             return new EntityFieldOperand(value);
         } else if (_.isArray(value)) {
