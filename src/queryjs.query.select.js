@@ -166,7 +166,7 @@
             }
         }
 
-        return new Promise(function (resolve, reject) {
+        return qjs.promise(function (resolve, reject) {
             if (!tx) {
                 qjs.transaction(function (tx) {
                     tx.executeSql(sql, args)

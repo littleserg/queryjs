@@ -151,6 +151,17 @@
     qjs.Predicates = qjs.Predicates || {};
     qjs.Predicates.BiPredicate = BiPredicate;
     qjs.Predicates.UniPredicate = UniPredicate;
+    qjs.Adapters = {
+        promiseApi: {
+            createPromise: function (fn) {
+                return new Promise(fn);
+            }
+        }
+    };
+
+    qjs.promise = function (fn) {
+        return qjs.Adapters.promiseApi.createPromise(fn);
+    };
 
     qjs.Transformers.ResultSetTransformer = ResultSetTransformer;
 
@@ -568,7 +579,7 @@
             }
         }
 
-        return new Promise(function (resolve, reject) {
+        return qjs.promise(function (resolve, reject) {
             if (!tx) {
                 qjs.transaction(function (tx) {
                     tx.executeSql(sql, args)
@@ -766,7 +777,7 @@
             }).join('\n AND ');
         }
 
-        return new Promise(function (resolve, reject) {
+        return qjs.promise(function (resolve, reject) {
             if (!tx) {
                 qjs.transaction(function (tx) {
                     tx.executeSql(sql, args).then(resolve, reject);
@@ -840,7 +851,7 @@
             sql += ') \nVALUES(?' + _.repeat(',?', this.setClauses.length - 1) + ')'
         }
 
-        return new Promise(function (resolve, reject) {
+        return qjs.promise(function (resolve, reject) {
             if (!tx) {
                 qjs.transaction(function (tx) {
                     tx.executeSql(sql, args).then(resolve, reject);
@@ -893,7 +904,7 @@
             }).join('\n AND ');
         }
 
-        return new Promise(function (resolve, reject) {
+        return qjs.promise(function (resolve, reject) {
             if (!tx) {
                 qjs.transaction(function (tx) {
                     tx.executeSql(sql, args).then(resolve, reject);
@@ -1087,7 +1098,7 @@
         qjs.db.sqliteplugin.transaction = function (t) {
             var that = {};
             that.executeSql = function (query, args) {
-                return new Promise(function (resolve, reject) {
+                return qjs.promise(function (resolve, reject) {
                     var start = new Date().getTime();
                     t.executeSql(query, args, function (_, result) {
                         qjs.logDebug(query, args, '\n{executed in', (new Date().getTime() - start), 'ms}');
@@ -1123,7 +1134,7 @@
         qjs.db.websql.transaction = function (t) {
             var that = {};
             that.executeSql = function (query, args, successFn, errorFn) {
-                return new Promise(function (resolve, reject) {
+                return qjs.promise(function (resolve, reject) {
                     var start = new Date().getTime();
                     t.executeSql(query, args, function (_, result) {
                         qjs.logDebug(query, args, '\n{executed in', (new Date().getTime() - start), 'ms}');

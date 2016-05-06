@@ -2,6 +2,14 @@ queryjs
 =======
 Javascript promise-based library to work with relational database following query-dsl approach
 
+Why?
+======
+- Safe query-like syntax
+- Easy-to-use promise based API
+- Automatic entities mapping with one-to-one and many-to-many support
+- Multiple database support (sqlite, websql)
+- debuggable sql queries (pretty-printed sql queries with timing in milliseconds)
+
 Install
 --------
 Install as a bower dependency
@@ -38,7 +46,7 @@ or replace queryjs.min.js with the bundle:
 ```
 Include angular module
 ``` javascript
-  angular.module('app', [queryjs]);
+  angular.module('app', ['queryjs']);
 ```
 
 Defining entities

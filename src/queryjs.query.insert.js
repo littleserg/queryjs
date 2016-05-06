@@ -49,7 +49,7 @@
             sql += ') \nVALUES(?' + _.repeat(',?', this.setClauses.length - 1) + ')'
         }
 
-        return new Promise(function (resolve, reject) {
+        return qjs.promise(function (resolve, reject) {
             if (!tx) {
                 qjs.transaction(function (tx) {
                     tx.executeSql(sql, args).then(resolve, reject);

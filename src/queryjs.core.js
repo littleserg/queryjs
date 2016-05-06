@@ -111,6 +111,17 @@
     qjs.Predicates = qjs.Predicates || {};
     qjs.Predicates.BiPredicate = BiPredicate;
     qjs.Predicates.UniPredicate = UniPredicate;
+    qjs.Adapters = {
+        promiseApi: {
+            createPromise: function (fn) {
+                return new Promise(fn);
+            }
+        }
+    };
+
+    qjs.promise = function (fn) {
+        return qjs.Adapters.promiseApi.createPromise(fn);
+    };
 
     qjs.Transformers.ResultSetTransformer = ResultSetTransformer;
 
