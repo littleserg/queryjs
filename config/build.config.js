@@ -16,8 +16,8 @@ module.exports = {
     ' * queryjs.query.insert.js, queryjs.query.update.js,\n'+
     ' * and queryjs.transformers.js\n'+
     ' */\n\n',
-    closureStart: '(function() {\n',
-    closureEnd: '\n})();',
+    closureStart: '(function() { var root = this;\n',
+    closureEnd: '\n}).call(this);',
 
     queryjsFiles: [
         'src/queryjs.core.js',

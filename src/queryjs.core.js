@@ -1,6 +1,8 @@
 (function () {
-    if (window.qjs) {
-        window.qjs.logError('queryjs has been included twice');
+    var root = this;
+    
+    if (root.qjs) {
+        root.qjs.logError('queryjs has been included twice');
     }
 
     var qjs = {
@@ -10,7 +12,24 @@
         }
     };
 
-    window.qjs = qjs;
+    if (typeof exports !== 'undefined') {
+        if (typeof module !== 'undefined' && module.exports) {
+            exports = module.exports = qjs
+        }
+        exports.qjs = qjs
+    } else {
+        root.qjs = qjs;
+    }
+
+    var hasLodash = typeof _ !== 'undefined';
+
+    var _ = root._;
+
+    if (typeof _ === 'undefined') {
+        if (!hasLodash) {
+            root._ = _ = require('lodash')
+        }
+    }
 
     qjs.debug = false;
 
@@ -66,19 +85,19 @@
     };
 
     qjs.logDebug = function () {
-        if (qjs.debug && window.console) {
-            window.console.debug
-                ? window.console.debug.apply(window.console, arguments)
-                : window.console.log.apply(window.console, arguments);
+        if (qjs.debug && root.console) {
+            root.console.debug
+                ? root.console.debug.apply(root.console, arguments)
+                : root.console.log.apply(root.console, arguments);
         }
 
     };
 
     qjs.logError = function () {
-        window.console && (
-            window.console.error
-                ? window.console.error.apply(window.console, arguments)
-                : window.console.log.apply(window.console, arguments)
+        root.console && (
+            root.console.error
+                ? root.console.error.apply(root.console, arguments)
+                : root.console.log.apply(root.console, arguments)
         );
     };
 
@@ -370,4 +389,4 @@
         throw new Error('Unmapped predicate ' + value);
     }
 
-})();
+}).call(this);

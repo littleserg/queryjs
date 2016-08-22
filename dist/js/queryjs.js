@@ -3,10 +3,12 @@
  * Licensed under the Apache 2.0 license. Please see LICENSE for more information.
  *
  */
-(function() {
+(function() { var root = this;
 (function () {
-    if (window.qjs) {
-        window.qjs.logError('queryjs has been included twice');
+    var root = this;
+    
+    if (root.qjs) {
+        root.qjs.logError('queryjs has been included twice');
     }
 
     var qjs = {
@@ -16,7 +18,24 @@
         }
     };
 
-    window.qjs = qjs;
+    if (typeof exports !== 'undefined') {
+        if (typeof module !== 'undefined' && module.exports) {
+            exports = module.exports = qjs
+        }
+        exports.qjs = qjs
+    } else {
+        root.qjs = qjs;
+    }
+
+    var hasLodash = typeof _ !== 'undefined';
+
+    var _ = root._;
+
+    if (typeof _ === 'undefined') {
+        if (!hasLodash) {
+            root._ = _ = require('lodash')
+        }
+    }
 
     qjs.debug = false;
 
@@ -72,19 +91,19 @@
     };
 
     qjs.logDebug = function () {
-        if (qjs.debug && window.console) {
-            window.console.debug
-                ? window.console.debug.apply(window.console, arguments)
-                : window.console.log.apply(window.console, arguments);
+        if (qjs.debug && root.console) {
+            root.console.debug
+                ? root.console.debug.apply(root.console, arguments)
+                : root.console.log.apply(root.console, arguments);
         }
 
     };
 
     qjs.logError = function () {
-        window.console && (
-            window.console.error
-                ? window.console.error.apply(window.console, arguments)
-                : window.console.log.apply(window.console, arguments)
+        root.console && (
+            root.console.error
+                ? root.console.error.apply(root.console, arguments)
+                : root.console.log.apply(root.console, arguments)
         );
     };
 
@@ -376,13 +395,25 @@
         throw new Error('Unmapped predicate ' + value);
     }
 
-})();
+}).call(this);
 (function () {
-    if (!window.qjs) {
-        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+    'use strict';
+
+    var root = this;
+
+    var qjs;
+    if (typeof exports !== 'undefined') {
+        qjs = exports.qjs;
+    } else {
+        qjs = root.qjs ;
     }
 
-    var qjs = window.qjs;
+    if (!qjs) {
+        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+        return;
+    }
+
+    var _ = root._;
 
     qjs.debugResultSet = false;
 
@@ -503,7 +534,7 @@
         if (!projection) {
             var participatedEntities = _.chain([]).concat(this.entity).concat(_.map(this.joins, 'joinEntity')).value();
             var projectionFields = collectFields({}, _.chain([]), this.entity).filter(function removeNotJoined(field) {
-                return _.contains(participatedEntities, field.entity);
+                return _.includes(participatedEntities, field.entity);
             }).value();
             projection = new Projection(projectionFields);
         }
@@ -682,13 +713,25 @@
         }
     }
 
-})();
+}).call(this);
 (function () {
-    if (!window.qjs) {
-        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+    'use strict';
+
+    var root = this;
+
+    var qjs;
+    if (typeof exports !== 'undefined') {
+        qjs = exports.qjs;
+    } else {
+        qjs = root.qjs ;
     }
 
-    var qjs = window.qjs;
+    if (!qjs) {
+        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+        return;
+    }
+
+    var _ = root._;
 
     qjs.Queries.UpdateQuery = UpdateQuery;
 
@@ -765,13 +808,25 @@
         return this.field.name + ' = ?';
     };
 
-})();
+}).call(this);
 (function () {
-    if (!window.qjs) {
-        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+    'use strict';
+
+    var root = this;
+
+    var qjs;
+    if (typeof exports !== 'undefined') {
+        qjs = exports.qjs;
+    } else {
+        qjs = root.qjs ;
     }
 
-    var qjs = window.qjs;
+    if (!qjs) {
+        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+        return;
+    }
+
+    var _ = root._;
 
     qjs.Queries.InsertQuery = InsertQuery;
 
@@ -838,13 +893,24 @@
         args.push(this.field.type.toSql(this.value));
     };
 
-})();
+}).call(this);
 (function () {
-    if (!window.qjs) {
+    'use strict';
+
+    var root = this;
+
+    var qjs;
+    if (typeof exports !== 'undefined') {
+        qjs = exports.qjs;
+    } else {
+        qjs = root.qjs ;
+    }
+
+    if (!qjs) {
         console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
     }
 
-    var qjs = window.qjs;
+    var _ = root._;
 
     qjs.Queries.DeleteQuery = DeleteQuery;
 
@@ -881,13 +947,25 @@
         });
     };
 
-})();
+}).call(this);
 (function () {
-    if (!window.qjs) {
-        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+    'use strict';
+
+    var root = this;
+
+    var qjs;
+    if (typeof exports !== 'undefined') {
+        qjs = exports.qjs;
+    } else {
+        qjs = root.qjs ;
     }
 
-    var qjs = window.qjs;
+    if (!qjs) {
+        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+        return;
+    }
+
+    var _ = root._;
 
     qjs.Transformers.SimpleListResultSetTransformer = SimpleListResultSetTransformer;
     qjs.Transformers.OneToManyListResultSetTransformer = OneToManyListResultSetTransformer;
@@ -904,8 +982,9 @@
     });
 
     SimpleListResultSetTransformer.prototype.transform = function (query, resultSet) {
+        var mappedEntities = {};
         return _.map(resultSet, function(row) {
-            return mapOne(row, query.entity)
+            return mapOne(mappedEntities, row, query.entity);
         });
     };
 
@@ -948,21 +1027,43 @@
         return resultSet.length ? resultSet[0][this.columnName] : null;
     };
 
-    function mapOne(row, entity) {
+    function mapOne(mappedEntities, row, entityClass) {
         var entityRow = _.cloneDeep(row);
         var entityData = {};
-        _.forEach(entity.metadata.fields, function (field) {
+        _.forEach(entityClass.metadata.fields, function (field) {
             var value = entityRow[field.getAlias()];
             entityData[field.name] = field.type.fromSql(value);
             delete entityRow[field.getAlias()];
         });
 
-        _.forEach(entity.metadata.hasOne, function (relMeta) {
-            var rel = mapOne(entityRow, relMeta.entity);
-            entityData[relMeta.propertyHolderName] = rel;
+        if (entityData.id) {
+            var alreadyMapped = mappedEntities[entityData.id];
+            if (alreadyMapped) {
+                return alreadyMapped;
+            }
+        }
+
+        var isEmpty = true;
+        _.forEach(entityData, function (d) {
+            if (isEmpty) {
+                isEmpty = _.isUndefined(d) || _.isNull(d) || d.entityClass || _.isArray(d) && !d.length;
+            }
         });
 
-        return new entity(entityData);
+        if (isEmpty) {
+            return null;
+        }
+
+        var entity = new entityClass(entityData);
+        
+        mappedEntities[entityData.id] = entity;
+
+        _.forEach(entityClass.metadata.hasOne, function (relMeta) {
+            var rel = mapOne(mappedEntities, entityRow, relMeta.entity);
+            entity[relMeta.propertyHolderName] = rel;
+        });
+
+        return entity;
     }
 
     function OneToManyListResultSetTransformer() {
@@ -977,47 +1078,64 @@
         return results;
     };
 
-    function mapMany(entity, rs) {
-        var groupedRoot = _.groupBy(rs, entity.id.getAlias());
+    function mapMany(entityClass, rs) {
+        var groupedRoot = _.groupBy(rs, entityClass.id.getAlias());
+        var mappedEntities = {};
         return _.chain(groupedRoot).map(function (children) {
             var entityData = {};
-            _.forEach(entity.metadata.hasMany, function (relMany) {
+            _.forEach(entityClass.metadata.hasMany, function (relMany) {
                 var rel = mapMany(relMany.entity, children);
                 entityData[relMany.propertyHolderName] = rel;
             });
 
             var entityRow = children[0];
 
-            _.forEach(entity.metadata.fields, function (field) {
+            _.forEach(entityClass.metadata.fields, function (field) {
                 var value = entityRow[field.getAlias()];
                 if (!_.isUndefined(value)) {
                     entityData[field.name] = field.type.fromSql(value);
                 }
             });
 
-            _.forEach(entity.metadata.hasOne, function (relMeta) {
-                entityData[relMeta.propertyHolderName] = mapOne(entityRow, relMeta.entity);
+            var entity = new entityClass(entityData);
+            mappedEntities[entityData.id] = entity;
+
+            _.forEach(entityClass.metadata.hasOne, function (relMeta) {
+                entity[relMeta.propertyHolderName] = mapOne(mappedEntities, entityRow, relMeta.entity);
             });
 
 
             var isEmpty = true;
-            _.forEach(entityData, function (d) {
+            _.forEach(entity, function (d) {
                 if (isEmpty) {
                     isEmpty = _.isUndefined(d) || _.isNull(d) || d.entityClass || _.isArray(d) && !d.length;
                 }
             });
-            return isEmpty ? null : new entity(entityData);
 
+
+            if (isEmpty) {
+                return null;
+            } else {
+                return entity;
+            }
         }).compact().value();
     }
 
-})();
+}).call(this);
 (function () {
-    if (!window.qjs) {
-        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+    var root = this;
+
+    var qjs;
+    if (typeof exports !== 'undefined') {
+        qjs = exports.qjs;
+    } else {
+        qjs = root.qjs ;
     }
 
-    var qjs = window.qjs;
+    if (!qjs) {
+        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+        return;
+    }
 
     qjs.store = qjs.store || {};
     qjs.store.cordovasql = {};
@@ -1037,9 +1155,9 @@
         qjs.db.implementation = "unsupported";
         qjs.db.conn = null;
 
-        if (window && 'sqlitePlugin' in window) {
+        if (root && 'sqlitePlugin' in root) {
             qjs.db.implementation = 'sqliteplugin';
-        } else if (window && window.openDatabase) {
+        } else if (root && root.openDatabase) {
             qjs.db.implementation = "websql";
         }
 
@@ -1047,7 +1165,7 @@
 
         qjs.db.sqliteplugin.connect = function (dbname, backgroundProcessing, iOSLocation) {
             var that = {};
-            var conn = window.sqlitePlugin.openDatabase({
+            var conn = root.sqlitePlugin.openDatabase({
                 name: dbname,
                 bgType: backgroundProcessing,
                 location: (iOSLocation || 0)
@@ -1134,6 +1252,6 @@
         }
     };
 
-})();
+}).call(this);
 
-})();
+}).call(this);

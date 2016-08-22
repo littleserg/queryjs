@@ -1,9 +1,20 @@
 (function () {
-    if (!window.qjs) {
+    'use strict';
+
+    var root = this;
+
+    var qjs;
+    if (typeof exports !== 'undefined') {
+        qjs = exports.qjs;
+    } else {
+        qjs = root.qjs ;
+    }
+
+    if (!qjs) {
         console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
     }
 
-    var qjs = window.qjs;
+    var _ = root._;
 
     qjs.Queries.DeleteQuery = DeleteQuery;
 
@@ -40,4 +51,4 @@
         });
     };
 
-})();
+}).call(this);

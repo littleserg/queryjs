@@ -1,9 +1,21 @@
 (function () {
-    if (!window.qjs) {
-        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+    'use strict';
+
+    var root = this;
+
+    var qjs;
+    if (typeof exports !== 'undefined') {
+        qjs = exports.qjs;
+    } else {
+        qjs = root.qjs ;
     }
 
-    var qjs = window.qjs;
+    if (!qjs) {
+        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+        return;
+    }
+
+    var _ = root._;
 
     qjs.Queries.UpdateQuery = UpdateQuery;
 
@@ -80,4 +92,4 @@
         return this.field.name + ' = ?';
     };
 
-})();
+}).call(this);

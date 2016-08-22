@@ -1,9 +1,21 @@
 (function () {
-    if (!window.qjs) {
-        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+    'use strict';
+
+    var root = this;
+
+    var qjs;
+    if (typeof exports !== 'undefined') {
+        qjs = exports.qjs;
+    } else {
+        qjs = root.qjs ;
     }
 
-    var qjs = window.qjs;
+    if (!qjs) {
+        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+        return;
+    }
+
+    var _ = root._;
 
     qjs.debugResultSet = false;
 
@@ -124,7 +136,7 @@
         if (!projection) {
             var participatedEntities = _.chain([]).concat(this.entity).concat(_.map(this.joins, 'joinEntity')).value();
             var projectionFields = collectFields({}, _.chain([]), this.entity).filter(function removeNotJoined(field) {
-                return _.contains(participatedEntities, field.entity);
+                return _.includes(participatedEntities, field.entity);
             }).value();
             projection = new Projection(projectionFields);
         }
@@ -303,4 +315,4 @@
         }
     }
 
-})();
+}).call(this);

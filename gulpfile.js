@@ -41,7 +41,7 @@ if (argv.dist) {
 }
 
 gulp.task('default', ['build']);
-gulp.task('build', ['bundle']);
+gulp.task('build', ['bundle', 'specs']);
 
 gulp.task('bundle', [
   'scripts', 'angular-int'
@@ -79,6 +79,12 @@ gulp.task('scripts', function() {
     .pipe(rename({ extname: '.min.js' }))
     .pipe(header(banner))
     .pipe(gulp.dest(buildConfig.dist + '/js'));
+});
+
+var jasmine = require('gulp-jasmine');
+gulp.task('specs', function () {
+  return gulp.src('spec/*.js')
+      .pipe(jasmine());
 });
 
 

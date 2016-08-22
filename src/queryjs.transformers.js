@@ -1,9 +1,21 @@
 (function () {
-    if (!window.qjs) {
-        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+    'use strict';
+
+    var root = this;
+
+    var qjs;
+    if (typeof exports !== 'undefined') {
+        qjs = exports.qjs;
+    } else {
+        qjs = root.qjs ;
     }
 
-    var qjs = window.qjs;
+    if (!qjs) {
+        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+        return;
+    }
+
+    var _ = root._;
 
     qjs.Transformers.SimpleListResultSetTransformer = SimpleListResultSetTransformer;
     qjs.Transformers.OneToManyListResultSetTransformer = OneToManyListResultSetTransformer;
@@ -20,8 +32,9 @@
     });
 
     SimpleListResultSetTransformer.prototype.transform = function (query, resultSet) {
+        var mappedEntities = {};
         return _.map(resultSet, function(row) {
-            return mapOne(row, query.entity)
+            return mapOne(mappedEntities, row, query.entity);
         });
     };
 
@@ -64,21 +77,43 @@
         return resultSet.length ? resultSet[0][this.columnName] : null;
     };
 
-    function mapOne(row, entity) {
+    function mapOne(mappedEntities, row, entityClass) {
         var entityRow = _.cloneDeep(row);
         var entityData = {};
-        _.forEach(entity.metadata.fields, function (field) {
+        _.forEach(entityClass.metadata.fields, function (field) {
             var value = entityRow[field.getAlias()];
             entityData[field.name] = field.type.fromSql(value);
             delete entityRow[field.getAlias()];
         });
 
-        _.forEach(entity.metadata.hasOne, function (relMeta) {
-            var rel = mapOne(entityRow, relMeta.entity);
-            entityData[relMeta.propertyHolderName] = rel;
+        if (entityData.id) {
+            var alreadyMapped = mappedEntities[entityData.id];
+            if (alreadyMapped) {
+                return alreadyMapped;
+            }
+        }
+
+        var isEmpty = true;
+        _.forEach(entityData, function (d) {
+            if (isEmpty) {
+                isEmpty = _.isUndefined(d) || _.isNull(d) || d.entityClass || _.isArray(d) && !d.length;
+            }
         });
 
-        return new entity(entityData);
+        if (isEmpty) {
+            return null;
+        }
+
+        var entity = new entityClass(entityData);
+        
+        mappedEntities[entityData.id] = entity;
+
+        _.forEach(entityClass.metadata.hasOne, function (relMeta) {
+            var rel = mapOne(mappedEntities, entityRow, relMeta.entity);
+            entity[relMeta.propertyHolderName] = rel;
+        });
+
+        return entity;
     }
 
     function OneToManyListResultSetTransformer() {
@@ -93,38 +128,47 @@
         return results;
     };
 
-    function mapMany(entity, rs) {
-        var groupedRoot = _.groupBy(rs, entity.id.getAlias());
+    function mapMany(entityClass, rs) {
+        var groupedRoot = _.groupBy(rs, entityClass.id.getAlias());
+        var mappedEntities = {};
         return _.chain(groupedRoot).map(function (children) {
             var entityData = {};
-            _.forEach(entity.metadata.hasMany, function (relMany) {
+            _.forEach(entityClass.metadata.hasMany, function (relMany) {
                 var rel = mapMany(relMany.entity, children);
                 entityData[relMany.propertyHolderName] = rel;
             });
 
             var entityRow = children[0];
 
-            _.forEach(entity.metadata.fields, function (field) {
+            _.forEach(entityClass.metadata.fields, function (field) {
                 var value = entityRow[field.getAlias()];
                 if (!_.isUndefined(value)) {
                     entityData[field.name] = field.type.fromSql(value);
                 }
             });
 
-            _.forEach(entity.metadata.hasOne, function (relMeta) {
-                entityData[relMeta.propertyHolderName] = mapOne(entityRow, relMeta.entity);
+            var entity = new entityClass(entityData);
+            mappedEntities[entityData.id] = entity;
+
+            _.forEach(entityClass.metadata.hasOne, function (relMeta) {
+                entity[relMeta.propertyHolderName] = mapOne(mappedEntities, entityRow, relMeta.entity);
             });
 
 
             var isEmpty = true;
-            _.forEach(entityData, function (d) {
+            _.forEach(entity, function (d) {
                 if (isEmpty) {
                     isEmpty = _.isUndefined(d) || _.isNull(d) || d.entityClass || _.isArray(d) && !d.length;
                 }
             });
-            return isEmpty ? null : new entity(entityData);
 
+
+            if (isEmpty) {
+                return null;
+            } else {
+                return entity;
+            }
         }).compact().value();
     }
 
-})();
+}).call(this);

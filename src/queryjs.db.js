@@ -1,9 +1,17 @@
 (function () {
-    if (!window.qjs) {
-        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+    var root = this;
+
+    var qjs;
+    if (typeof exports !== 'undefined') {
+        qjs = exports.qjs;
+    } else {
+        qjs = root.qjs ;
     }
 
-    var qjs = window.qjs;
+    if (!qjs) {
+        console && (console.error ? console.error : console.log)('Add queryjs.core before using other modules');
+        return;
+    }
 
     qjs.store = qjs.store || {};
     qjs.store.cordovasql = {};
@@ -23,9 +31,9 @@
         qjs.db.implementation = "unsupported";
         qjs.db.conn = null;
 
-        if (window && 'sqlitePlugin' in window) {
+        if (root && 'sqlitePlugin' in root) {
             qjs.db.implementation = 'sqliteplugin';
-        } else if (window && window.openDatabase) {
+        } else if (root && root.openDatabase) {
             qjs.db.implementation = "websql";
         }
 
@@ -33,7 +41,7 @@
 
         qjs.db.sqliteplugin.connect = function (dbname, backgroundProcessing, iOSLocation) {
             var that = {};
-            var conn = window.sqlitePlugin.openDatabase({
+            var conn = root.sqlitePlugin.openDatabase({
                 name: dbname,
                 bgType: backgroundProcessing,
                 location: (iOSLocation || 0)
@@ -120,4 +128,4 @@
         }
     };
 
-})();
+}).call(this);
