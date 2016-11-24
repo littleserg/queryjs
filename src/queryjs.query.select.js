@@ -7,7 +7,7 @@
     if (typeof exports !== 'undefined') {
         qjs = exports.qjs;
     } else {
-        qjs = root.qjs ;
+        qjs = root.qjs;
     }
 
     if (!qjs) {
@@ -184,18 +184,33 @@
                     tx.executeSql(sql, args)
                         .then(function (resultSet) {
                             logResultSet(resultSet);
-                            resolve(transformer.transform(self.getRoot(), resultSet));
+                            try {
+                                resolve(transformer.transform(self.getRoot(), resultSet));
+                            } catch (err) {
+                                reject({
+                                    sql: sql,
+                                    args: args,
+                                    error: err
+                                });
+                            }
                         }, reject);
                 });
             } else {
                 tx.executeSql(sql, args)
                     .then(function (resultSet) {
                         logResultSet(resultSet);
-                        resolve(transformer.transform(self.getRoot(), resultSet));
+                        try {
+                            resolve(transformer.transform(self.getRoot(), resultSet));
+                        } catch (err) {
+                            reject({
+                                sql: sql,
+                                args: args,
+                                error: err
+                            });
+                        }
                     }, reject);
             }
         });
-
     };
 
     function Projection() {

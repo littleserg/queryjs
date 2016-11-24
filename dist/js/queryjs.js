@@ -405,7 +405,7 @@
     if (typeof exports !== 'undefined') {
         qjs = exports.qjs;
     } else {
-        qjs = root.qjs ;
+        qjs = root.qjs;
     }
 
     if (!qjs) {
@@ -582,18 +582,33 @@
                     tx.executeSql(sql, args)
                         .then(function (resultSet) {
                             logResultSet(resultSet);
-                            resolve(transformer.transform(self.getRoot(), resultSet));
+                            try {
+                                resolve(transformer.transform(self.getRoot(), resultSet));
+                            } catch (err) {
+                                reject({
+                                    sql: sql,
+                                    args: args,
+                                    error: err
+                                });
+                            }
                         }, reject);
                 });
             } else {
                 tx.executeSql(sql, args)
                     .then(function (resultSet) {
                         logResultSet(resultSet);
-                        resolve(transformer.transform(self.getRoot(), resultSet));
+                        try {
+                            resolve(transformer.transform(self.getRoot(), resultSet));
+                        } catch (err) {
+                            reject({
+                                sql: sql,
+                                args: args,
+                                error: err
+                            });
+                        }
                     }, reject);
             }
         });
-
     };
 
     function Projection() {
@@ -1176,6 +1191,11 @@
                     return fn(qjs.db.sqliteplugin.transaction(sqlt));
                 });
             };
+
+            that.getNativeConnection = function () {
+                return conn;
+            };
+
             return that;
         };
 
@@ -1212,6 +1232,11 @@
                     return fn(qjs.db.websql.transaction(sqlt));
                 });
             };
+
+            that.getNativeConnection = function () {
+                return conn;
+            };
+
             return that;
         };
 
@@ -1250,6 +1275,8 @@
         if (!conn) {
             throw new Error("No supported database found in this browser.");
         }
+
+        qjs.db.conn = conn;
     };
 
 }).call(this);

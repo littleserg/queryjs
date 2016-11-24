@@ -52,6 +52,11 @@
                     return fn(qjs.db.sqliteplugin.transaction(sqlt));
                 });
             };
+
+            that.getNativeConnection = function () {
+                return conn;
+            };
+
             return that;
         };
 
@@ -88,6 +93,11 @@
                     return fn(qjs.db.websql.transaction(sqlt));
                 });
             };
+
+            that.getNativeConnection = function () {
+                return conn;
+            };
+
             return that;
         };
 
@@ -126,6 +136,8 @@
         if (!conn) {
             throw new Error("No supported database found in this browser.");
         }
+
+        qjs.db.conn = conn;
     };
 
 }).call(this);
