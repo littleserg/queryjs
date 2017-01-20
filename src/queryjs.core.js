@@ -280,10 +280,10 @@
     // Predicates
 
     function BiPredicate(left, right, operator, aggregator) {
-        if (!left) {
+        if (_.isUndefined(left)) {
             throw new Error('Check left operand to apply operator "' + operator + '"');
         }
-        if (!right) {
+        if (_.isUndefined(right)) {
             throw new Error('Check right operand to apply operator "' + operator + '"');
         }
         this.leftOperand = createOperand(left, right);
